@@ -1,25 +1,21 @@
-let graph = [0, 1, 2, 3, 4, 5, 6 , 7];
-let movesCount = 0;
-let moves = []
-
-
-class knightMoves{
+class knight{
     constructor(){
         this.moves = [
             [1, 2], [2, 1], [1, -2], [2, -1],
             [-1, -2], [-2, -1], [-1, 2], [-2, 1]
         ]
-        this.knightTravailed = new Array(8).fill(null).map(() => new Array(8).fill(false));
+        this.knightTravailedGraph = new Array(8).fill(null).map(() => new Array(8).fill(false));
         this.nodeTree = new Node();
     }
-    transversal(start, end){
-        if(start[0] === end[0] && start[1] === end[1]) return console.log("Same spot")
+    knightMoves(start, end){
+        if(start[0] === end[0] && start[1] === end[1]) return console.log("Same spot");
+        if(!this.validate(start) || !this.validate(end)) return console.log("Invalid Start/End")
+
         const queue = [];
-        let count = 7;
-        let length = 0
         queue.push(start);
         this.nodeTree.data = start
-        this.knightTravailed[start[0]][start[1]] = true;
+        this.knightTravailedGraph[start[0]][start[1]] = true;
+
         while(queue.length !== 0){
             for(let n in this.moves){
                 let element = this.find(queue[0])
@@ -28,36 +24,23 @@ class knightMoves{
                     queue.push(move);
                     element.moves.push(new Node(move))
                 } else if(move[0] === end[0] && move[1] === end[1]){
-                    element.moves.push(new Node(move))
-                    console.log(count)
-                   
-                    return this.logPath(queue[0], move, movesCount += 1)
+                    element.moves.push(new Node(move))                   
+                    return this.logPath(move)
                 }
-                length += 1;
-                console.log(movesCount, count, length)
             }
             queue.shift()
-            if(count === 7) {
-                movesCount += 1;
-                count = 0;
-            }
-            count += 1;
-            console.log(count)
-
         } 
-        
     }
     validate(move){
         if(move[0] > 7 || move[1] > 7 || move[0] < 0 || move[1] < 0) {
             return false
         }
-        if(this.knightTravailed[move[0]][move[1]]){
+        if(this.knightTravailedGraph[move[0]][move[1]]){
             return false
         } else{
-            this.knightTravailed[move[0]][move[1]] = true
+            this.knightTravailedGraph[move[0]][move[1]] = true
             return true
         }
-        
     }
     find(value, node = this.nodeTree){
         if(node === undefined) return
@@ -89,19 +72,22 @@ class knightMoves{
         }
         return node
     }
-    logPath(lastMove, end, count, pastElements = []){
-        console.log(`You made it in ${count} moves! Here is your path:`)
-        for(let i = 1; i < count; i++){
+    logPath(lastMove, pastElements = []){
+        //Gets past steps
+        while(lastMove !== this.nodeTree.data){
             pastElements.push(lastMove)
             lastMove = this.findPrev(lastMove)[1].data
         }
+        pastElements.push(lastMove)
         pastElements.reverse();
+
+        console.log(`You made it in ${pastElements.length - 1} moves! Here is your path:`)
+       
         for(let i = 0; i < pastElements.length; i++){
             console.log(pastElements[i])
         }
-        console.log(end)
-        console.log(this.nodeTree)
-
+        
+        //console.log(this.nodeTree)
     }
 }
 
@@ -112,10 +98,5 @@ class Node{
     }
 }
 
-
-
-
-
-
-const KNIGHT = new knightMoves;
-KNIGHT.transversal([7, 3], [4, 3])
+const KNIGHT = new knight;
+KNIGHT.knightMoves([3, 1], [0, 3])
