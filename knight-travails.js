@@ -10,35 +10,41 @@ class knightMoves{
             [-1, -2], [-2, -1], [-1, 2], [-2, 1]
         ]
         this.knightTravailed = new Array(8).fill(null).map(() => new Array(8).fill(false));
-        this.nodeTree = new Node()
+        this.nodeTree = new Node();
     }
     transversal(start, end){
-        let queue = [];
+        if(start[0] === end[0] && start[1] === end[1]) return console.log("Same spot")
+        const queue = [];
         let count = 7;
-        let dequeue = [];
+        let length = 0
         queue.push(start);
         this.nodeTree.data = start
         this.knightTravailed[start[0]][start[1]] = true;
         while(queue.length !== 0){
             for(let n in this.moves){
-                console.log(count)
-                if(count > 3){
-                    
-                }
+                let element = this.find(queue[0])
                 let move = [queue[0][0] + this.moves[n][0], queue[0][1] + this.moves[n][1]]
                 if(this.validate(move)){
                     queue.push(move);
+                    element.moves.push(new Node(move))
                 } else if(move[0] === end[0] && move[1] === end[1]){
-                    console.log(dequeue)
-                    return this.logPath(queue[0], move, movesCount += 1, dequeue)
+                    element.moves.push(new Node(move))
+                    console.log(count)
+                   
+                    return this.logPath(queue[0], move, movesCount += 1)
                 }
+                length += 1;
+                console.log(movesCount, count, length)
             }
-            dequeue.push(queue.shift());
-            if(count === 7) {movesCount += 1; count = 0}
+            queue.shift()
+            if(count === 7) {
+                movesCount += 1;
+                count = 0;
+            }
             count += 1;
-            console.log(queue[0], count)
+            console.log(count)
 
-        }   
+        } 
         
     }
     validate(move){
@@ -53,12 +59,48 @@ class knightMoves{
         }
         
     }
-   
-    logPath(lastMove, end, count, pastElements){
+    find(value, node = this.nodeTree){
+        if(node === undefined) return
+        for(let i = 0; i < node.moves.length; i++){
+            if(node.moves[i].data === value) return node.moves[i];
+        }
+        if(node.data !== value){
+            for(let n in node.moves){
+                let test = this.find(value, node.moves[n])
+                if(test.data === value) return test
+            }
+        }
+        return node
+    }
+    findPrev(value, node = this.nodeTree){
+        if(node === undefined ) return undefined
+        if( value === node.data) return [node, node]
+        for(let i = 0; i < node.moves.length; i++){
+                if(node.moves[i].data[0] === value[0] && 
+                   node.moves[i].data[1] === value[1]) {
+                    return [node.moves[i], node]
+                };
+        }
+        if(node.data !== value){
+            for(let n in node.moves){
+                let test = this.findPrev(value, node.moves[n])
+                if(test.length === 2) return test
+            }
+        }
+        return node
+    }
+    logPath(lastMove, end, count, pastElements = []){
         console.log(`You made it in ${count} moves! Here is your path:`)
-       /
-        console.log(lastMove)
+        for(let i = 1; i < count; i++){
+            pastElements.push(lastMove)
+            lastMove = this.findPrev(lastMove)[1].data
+        }
+        pastElements.reverse();
+        for(let i = 0; i < pastElements.length; i++){
+            console.log(pastElements[i])
+        }
         console.log(end)
+        console.log(this.nodeTree)
 
     }
 }
@@ -66,7 +108,7 @@ class knightMoves{
 class Node{
     constructor(data = null, moves = []){
         this.data = data;
-        this.left = moves;
+        this.moves = moves;
     }
 }
 
@@ -76,5 +118,4 @@ class Node{
 
 
 const KNIGHT = new knightMoves;
-KNIGHT.transversal([5, 3], [0, 0])
-console.log(KNIGHT)
+KNIGHT.transversal([7, 3], [4, 3])
